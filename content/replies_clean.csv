@@ -1,0 +1,419 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Scraping.ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyMIy91DeQ4A1m2k/ITtP/cH",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/tanishka2000/AppDev_AmericanExpress/blob/main/content/replies_clean.csv\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "rFH6werl_eDe",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "8b4d5e50-4d25-4923-e241-be434af34348"
+      },
+      "source": [
+        "!pip install praw\n",
+        "import praw\n",
+        "import csv"
+      ],
+      "execution_count": 1,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Collecting praw\n",
+            "\u001b[?25l  Downloading https://files.pythonhosted.org/packages/2c/15/4bcc44271afce0316c73cd2ed35f951f1363a07d4d5d5440ae5eb2baad78/praw-7.1.0-py3-none-any.whl (152kB)\n",
+            "\r\u001b[K     |██▏                             | 10kB 16.3MB/s eta 0:00:01\r\u001b[K     |████▎                           | 20kB 11.8MB/s eta 0:00:01\r\u001b[K     |██████▌                         | 30kB 10.4MB/s eta 0:00:01\r\u001b[K     |████████▋                       | 40kB 8.0MB/s eta 0:00:01\r\u001b[K     |██████████▊                     | 51kB 4.2MB/s eta 0:00:01\r\u001b[K     |█████████████                   | 61kB 4.6MB/s eta 0:00:01\r\u001b[K     |███████████████                 | 71kB 4.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▎              | 81kB 5.2MB/s eta 0:00:01\r\u001b[K     |███████████████████▍            | 92kB 5.6MB/s eta 0:00:01\r\u001b[K     |█████████████████████▌          | 102kB 5.8MB/s eta 0:00:01\r\u001b[K     |███████████████████████▊        | 112kB 5.8MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▉      | 122kB 5.8MB/s eta 0:00:01\r\u001b[K     |████████████████████████████    | 133kB 5.8MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▏ | 143kB 5.8MB/s eta 0:00:01\r\u001b[K     |████████████████████████████████| 153kB 5.8MB/s \n",
+            "\u001b[?25hCollecting update-checker>=0.17\n",
+            "  Downloading https://files.pythonhosted.org/packages/0c/ba/8dd7fa5f0b1c6a8ac62f8f57f7e794160c1f86f31c6d0fb00f582372a3e4/update_checker-0.18.0-py3-none-any.whl\n",
+            "Collecting websocket-client>=0.54.0\n",
+            "\u001b[?25l  Downloading https://files.pythonhosted.org/packages/4c/5f/f61b420143ed1c8dc69f9eaec5ff1ac36109d52c80de49d66e0c36c3dfdf/websocket_client-0.57.0-py2.py3-none-any.whl (200kB)\n",
+            "\u001b[K     |████████████████████████████████| 204kB 39.2MB/s \n",
+            "\u001b[?25hCollecting prawcore<2.0,>=1.3.0\n",
+            "  Downloading https://files.pythonhosted.org/packages/1d/40/b741437ce4c7b64f928513817b29c0a615efb66ab5e5e01f66fe92d2d95b/prawcore-1.5.0-py3-none-any.whl\n",
+            "Requirement already satisfied: requests>=2.3.0 in /usr/local/lib/python3.6/dist-packages (from update-checker>=0.17->praw) (2.23.0)\n",
+            "Requirement already satisfied: six in /usr/local/lib/python3.6/dist-packages (from websocket-client>=0.54.0->praw) (1.15.0)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.6/dist-packages (from requests>=2.3.0->update-checker>=0.17->praw) (2020.11.8)\n",
+            "Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.6/dist-packages (from requests>=2.3.0->update-checker>=0.17->praw) (2.10)\n",
+            "Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python3.6/dist-packages (from requests>=2.3.0->update-checker>=0.17->praw) (1.24.3)\n",
+            "Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python3.6/dist-packages (from requests>=2.3.0->update-checker>=0.17->praw) (3.0.4)\n",
+            "Installing collected packages: update-checker, websocket-client, prawcore, praw\n",
+            "Successfully installed praw-7.1.0 prawcore-1.5.0 update-checker-0.18.0 websocket-client-0.57.0\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "scyLckosAUmP"
+      },
+      "source": [
+        "reddit = praw.Reddit(client_id='lAmRAR07OGCEzw', client_secret='voOuxMFvaSeQJng826GAhxCiTi1EVQ', user_agent='tanishka2000')\n"
+      ],
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "y49mHTFHO8dp",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 35
+        },
+        "outputId": "e14265f7-b8f8-4553-e969-785c8df2bbee"
+      },
+      "source": [
+        "# get 10 hot posts from the CreditCard subreddit\n",
+        "'''hot_posts = reddit.subreddit('CreditCard').hot(limit=10)\n",
+        "for post in hot_posts:\n",
+        "    print(post.title)'''"
+      ],
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            },
+            "text/plain": [
+              "\"hot_posts = reddit.subreddit('CreditCard').hot(limit=10)\\nfor post in hot_posts:\\n    print(post.title)\""
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 3
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Ha7yT95OPAl0",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 53
+        },
+        "outputId": "456029d2-6a43-4810-a027-207e4c295578"
+      },
+      "source": [
+        "'''import pandas as pd\n",
+        "posts = []\n",
+        "ml_subreddit = reddit.subreddit('CreditCard')\n",
+        "for post in ml_subreddit.hot(limit=10):\n",
+        "    posts.append([post.title, post.score, post.id, post.subreddit, post.url, post.num_comments, post.selftext, post.created])\n",
+        "posts = pd.DataFrame(posts,columns=['title', 'score', 'id', 'subreddit', 'url', 'num_comments', 'body', 'created'])\n",
+        "data_top = posts.head()  \n",
+        "    \n",
+        "# display  \n",
+        "data_top  '''"
+      ],
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            },
+            "text/plain": [
+              "\"import pandas as pd\\nposts = []\\nml_subreddit = reddit.subreddit('CreditCard')\\nfor post in ml_subreddit.hot(limit=10):\\n    posts.append([post.title, post.score, post.id, post.subreddit, post.url, post.num_comments, post.selftext, post.created])\\nposts = pd.DataFrame(posts,columns=['title', 'score', 'id', 'subreddit', 'url', 'num_comments', 'body', 'created'])\\ndata_top = posts.head()  \\n    \\n# display  \\ndata_top  \""
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 4
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "cuaQBm-0P0et"
+      },
+      "source": [
+        "# get Credit Card subreddit data\n",
+        "#ml_subreddit = reddit.subreddit('CreditCards')\n",
+        "\n",
+        "#print(ml_subreddit.description)"
+      ],
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "tgW7_vCVQFzq"
+      },
+      "source": [
+        "#1st\n",
+        "#submission = reddit.submission(url=\"https://www.reddit.com/r/Repsneakers/comments/j52hht/credit_card_experiences/\")\n",
+        "\n",
+        "# 2nd\n",
+        "#submission = reddit.submission(id=\"jmq3f5\")\n",
+        "\n",
+        "#3rd\n",
+        "#submission = reddit.submission(url=\"https://www.reddit.com/r/DACA/comments/6eh1un/secured_credit_card_experiences/\")\n",
+        "\n",
+        "#4th\n",
+        "#submission = reddit.submission(url=\"https://www.reddit.com/r/amex/comments/7ele1b/worse_credit_card_experience/\")\n",
+        "\n",
+        "#5th\n",
+        "#submission = reddit.submission(url=\"https://www.reddit.com/r/personalfinance/comments/5yqcrw/confusing_and_frustrating_credit_card_experience/\")\n",
+        "\n",
+        "#6th\n",
+        "#submission = reddit.submission(url=\"https://www.reddit.com/r/personalfinance/comments/jt2o21/thinking_of_closing_3_credit_cards_with_chase_due/\")"
+      ],
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 35
+        },
+        "id": "LiZ4fISUQbpk",
+        "outputId": "857391d1-6a71-477a-c4f4-3b0bfd48d17d"
+      },
+      "source": [
+        "from praw.models import MoreComments\n",
+        "'''for top_level_comment in submission.comments:\n",
+        "    if isinstance(top_level_comment, MoreComments):\n",
+        "        continue\n",
+        "    print(top_level_comment.body)'''"
+      ],
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            },
+            "text/plain": [
+              "'for top_level_comment in submission.comments:\\n    if isinstance(top_level_comment, MoreComments):\\n        continue\\n    print(top_level_comment.body)'"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 10
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "bnue-hqOQkq2"
+      },
+      "source": [
+        "'''submission.comments.replace_more(limit=0)\n",
+        "for top_level_comment in submission.comments:\n",
+        "    print(top_level_comment.body)'''"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "lXpfIIXyQyhM",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 237
+        },
+        "outputId": "f1cc5867-5507-4ae2-9b8e-ea7fad1d4907"
+      },
+      "source": [
+        "submission.comments.replace_more(limit=0)\n",
+        "#creating a list\n",
+        "comments_jmq3f5 = []\n",
+        "for comment in submission.comments.list():\n",
+        "    comments_jmq3f5.append(comment.body)\n",
+        "\n",
+        "#comments_jmq3f5\n",
+        "import pandas as pd    \n",
+        "\n",
+        "df = pd.DataFrame(comments_jmq3f5)\n",
+        "df.to_csv('filename.csv', mode='a', header=False, index=False)\n"
+      ],
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "NameError",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-11-62db608026cd>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m()\u001b[0m\n\u001b[0;32m----> 1\u001b[0;31m \u001b[0msubmission\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcomments\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mreplace_more\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mlimit\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      2\u001b[0m \u001b[0;31m#creating a list\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      3\u001b[0m \u001b[0mcomments_jmq3f5\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mcomment\u001b[0m \u001b[0;32min\u001b[0m \u001b[0msubmission\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcomments\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mlist\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      5\u001b[0m     \u001b[0mcomments_jmq3f5\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mappend\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcomment\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mbody\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mNameError\u001b[0m: name 'submission' is not defined"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Cg-5PTIYejoy"
+      },
+      "source": [
+        "Reddit scrapping"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "omSqUTa9Q3Ng"
+      },
+      "source": [
+        "for submission in reddit.subreddit(\"creditcard+experience\").hot():\n",
+        "    print(submission.title)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PlntIu4QSlol"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "GZ-LwPoapNdP"
+      },
+      "source": [
+        "Tweepy"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "mHPmvEtdpNPo"
+      },
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "kyNHCHfCNUgw"
+      },
+      "source": [
+        "pip install tweepy"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "L7mEaTJzQO48"
+      },
+      "source": [
+        "import csv\n",
+        "import tweepy\n",
+        "import ssl\n",
+        "ssl._create_default_https_context = ssl._create_unverified_context\n",
+        "# Oauth keys\n",
+        "consumer_key = \"zRRYtx0lsZEbNwBepAqcZmY4d\"\n",
+        "consumer_secret = \"kn1zGIUYxLD6eS8xHJ3yIi1CpFFpQAMKDdCFQQazyPYFvu3zrt\"\n",
+        "access_token = \"1064935789950320641-L1vMMyLz3TAfSCK7O2eWeFYs9iEjuu\"\n",
+        "access_token_secret = \"9LrEDRP3hup7kLM3bjjlDxd1DBpGwJhESsOzzIuQdiyg2\"\n",
+        "# Authentication with Twitter\n",
+        "auth = tweepy.OAuthHandler(consumer_key, consumer_secret)\n",
+        "auth.set_access_token(access_token, access_token_secret)\n",
+        "api = tweepy.API(auth)"
+      ],
+      "execution_count": 27,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "AMkPKr1PTAf8",
+        "outputId": "263f2fd3-a77f-4170-8168-7f22fe4c3527"
+      },
+      "source": [
+        "search_words = \"credit+card+redeem\"\n",
+        "date_since = \"2018-11-16\"\n",
+        "\n",
+        "# Collect tweets\n",
+        "tweets = tweepy.Cursor(api.search,\n",
+        "              q=search_words,\n",
+        "              lang=\"en\",\n",
+        "              since=date_since).items(1000)\n",
+        "\n",
+        "import pandas as pd    \n",
+        "\n",
+        "# Collect a list of tweets\n",
+        "t = [tweet.text for tweet in tweets]\n",
+        "print(t)\n",
+        "\n",
+        "df = pd.DataFrame(t)\n",
+        "df.to_csv('replies_offer.csv', mode='a', header=False, index=False)"
+      ],
+      "execution_count": 62,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "['What if we tell you that your rent payment can also pay for your shopping bill? Use your credit card for your rent… https://t.co/hm7eMvawxB', 'Just present your #QNBLife Rewards Debit or Credit Card to redeem your points instantly via #QNB POS terminals… https://t.co/Tsj2jBnaaS', 'RT @BondTheOG: @LeidenfrostL Great post. Putting as many expenses through AMEX or any other similar credit card for points (or cashback), t…', 'lol on my new credit card i already have enough points to redeem a flight to new york', '💳🛍 Citi cardholders, you will be able to redeem your ThankYou points for a gift card at a discounted rate – but for… https://t.co/LQJbtzqYnK', 'RT @LarrysTwin99: Redeem your credit card points and get them something half-assed', 'Get rewarded for your biggest monthly expense and maximize your savings by paying your rent using your credit card.… https://t.co/SCqbnJansB', \"What people are looking to redeem with their credit card spend is really telling lmao... these are what I'm checkin… https://t.co/zDq0cpGNay\", 'RT @fold_app: “Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on the credit c…', 'RT @fold_app: “Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on the credit c…', 'RT @fold_app: “Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on the credit c…', '@AskPlayStation Hello sir,today there is an update coming to crew 2 ,I wanna purchase some virtual ingame credits,b… https://t.co/7lT1CNLeCG', 'RT @fold_app: “Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on the credit c…', 'RT @fold_app: “Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on the credit c…', '“Already stacked 30$ worth of sats and have only spent like 210 dollars so far.  I have to spend like 2 grand on th… https://t.co/DbMP67rcgu', 'This season Achieve is making your holiday shopping even more rewarding. Use your Achieve Credit Card Nov 23 – Nov… https://t.co/A0UlSSkDsK', '@LeidenfrostL Great post. Putting as many expenses through AMEX or any other similar credit card for points (or cas… https://t.co/kU2jc0rD34', 'RT @LarrysTwin99: Redeem your credit card points and get them something half-assed', '@discord Wow what a scam got the nitro and the code for xbox pass\\nbut when you try to redeem you actually need add… https://t.co/CX6aqHc33p', '@ellewoodsgolfs We use our credit card points for appliances. Accumulate for 5 years and then redeem for big box st… https://t.co/Qc5hWhMnnl', 'Redeem your credit card points and get them something half-assed', 'What would you redeem your credit card reward points for - car rental or cash back? \\n\\nCan you answer with an emoji?… https://t.co/OMpAbz3yzz', 'What would you redeem your credit card reward points for - car rental or cash back? \\n\\nCan you answer with an emoji?… https://t.co/zyGsYz8AvE', 'What would you redeem your credit card reward points for - car rental or cash back? \\n\\nCan you answer with an emoji?… https://t.co/NLTzngNep9', 'What would you redeem your credit card reward points for - car rental or cash back? \\n\\nCan you answer with an emoji?… https://t.co/ys49BtCzYl', 'RT @YESBANK: Share to show you care with the YES BANK Credit Card Rewards Program! Enjoy unique features like sharing of reward points with…', 'RT @YESBANK: Share to show you care with the YES BANK Credit Card Rewards Program! Enjoy unique features like sharing of reward points with…', 'Share to show you care with the YES BANK Credit Card Rewards Program! Enjoy unique features like sharing of reward… https://t.co/SVyXS4uJE9', '@MyIndusIndBank is there any charges for credit card reward points redeem??', 'Stay in your landlord’s good books by paying your rent on time. Pay your rent using your credit card through magicb… https://t.co/t269d8fRY9', 'Shopping for someone but not sure what to give them? Why not give them a SIVUU® gift card with your choice of credi… https://t.co/QHTExvG4y6', '@abcdefarah I guna for redeem petrol je. Etc: 3000 points = RM45 petrol. 450 points = RM5 petrol. But if u have cre… https://t.co/JlHebzEpvY', '@HDFCcare How can I redeem my credit card rewards point into my outstanding amount of my credit card bill.Please pr… https://t.co/hhPoRPlkQM', '@SBICard_Connect Another Big Scam By Bank.. \\nAt many petrol pump they sold Credit Card saying that points could be… https://t.co/uBgg7Pnzd1', 'Nov 27 to Dec 2 looks like Shoppers is running a PC Optimum Points Promotion.  \\nRedeem:\\n70K pts for $100 value\\n130K… https://t.co/MZlFPxkond', \"@McChicken7777 @AustinOMeara1 @spieltimes Nah\\n Kohl's cash can't be redeem till the 28th. Our money should be back… https://t.co/alVAUJpmPi\", '@HDFCBank_Cares Annual fee charged even you said its life time free\\n\\nI did not seen any benefit to use millennia cr… https://t.co/MSG3R4mQMn', '@HDFCBank_Cares hi , I redeem 5 Vijay sales e-vouchers of Rs 2000 each from my credit card reward points, but I am… https://t.co/yZqmSMp9ve', \"Avoiding hotels this holiday season? Here's how to book AirBnbs and rentals with credit card rewards. https://t.co/ZMiTy42SlK\", 'So if I wanted access to the eShop, I had to literally make up an American address. And then to pay for things, buy… https://t.co/I9nK9FCLVF', \"@deepigoyal It's  been two  weeks I have been struggling with Zomato Edition Cash Credit card. Haven't been se to r… https://t.co/YZV6VtLzdQ\", '@kunalb11 No more attractive products on cred that I redeem via accumulated points. Better to switch to my netbanki… https://t.co/mfKi7KpZGC', '@ElliotAndersonv They forgot to disinfect the bell n tokens after each use.   All must remember it’s passionately s… https://t.co/sLrvuhRn9D', 'RT @rob2775: Just in time for holiday season, @Klarna reaches 60,000 US #retail outlets for in-store buy now pay later credit, a #payments…', 'Just in time for holiday season, @Klarna reaches 60,000 US #retail outlets for in-store buy now pay later credit, a… https://t.co/kgJaJv4Olg', 'Note: I never had a RBL bank card,\\nAlso look at #jamtara language.\\n\\nText: Dear Rbl Credit Card Customer, Your Redee… https://t.co/WaohJrT2I5', 'RT @ESFCU: Earn double points while shopping local this holiday season with your Visa® Rewards credit card. Then redeem your points for tra…', \"Dear @rblbank kindly take away the points, as they don't belong to me.\\nDear Rbl Credit Card Customer, Your Redeem p… https://t.co/GaK3wa1VOT\", 'Oh what fun it is to get double points on purchases! Get 2X points when you pay with your EECU Visa Platinum credit… https://t.co/RiI61osQsb', \"Is it true that even if you redeem the PS Now card, the PSN still asks you for your credit card information?\\n\\nI'm s… https://t.co/JSJujJVRtu\", \"@AppleTV bit unfair. I get offered a year free apple TV. I can't redeem it because I don't have a credit card. Migh… https://t.co/mYvyDgT3Sc\", 'Spam calls on rise . 7223914608 asked my card details and received for first time and CVV to redeem a point i have… https://t.co/aJnRocSsMw', '@HDFCBank_Cares I want to redeem my reward points on credit card and have been trying to get in touch with your ban… https://t.co/VcePvh9sbJ', 'RT @FieldYates: Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zoom Q&amp;A w…', 'RT @FieldYates: Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zoom Q&amp;A w…', 'RT @FieldYates: Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zoom Q&amp;A w…', 'RT @FieldYates: Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zoom Q&amp;A w…', 'RT @FieldYates: Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zoom Q&amp;A w…', 'Had a great time Zooming with @TKelce and some Chiefs @NFLExtraPoints cardmembers. Want to join us for the 11/24 Zo… https://t.co/6Ri9peXECv', '@MxJLloyd Hello! That’s correct - Once you receive your card in the post, there’s instructions to register it and t… https://t.co/K6DQqQOUSH', 'Earn double points while shopping local this holiday season with your Visa® Rewards credit card. Then redeem your p… https://t.co/Ha0aDPC6dD', \"@GCPcloud, I'm a student at college who wants to experiment and grow on #GCP. None in my family has a credit card t… https://t.co/Y146iqpYhE\", 'RT @NFLExtraPoints: What do football fans do for fun in 2020? Grab the family for a Zoom call with Super Bowl champ and tight end Travis Ke…', 'What do football fans do for fun in 2020? Grab the family for a Zoom call with Super Bowl champ and tight end Travi… https://t.co/mgygFyroZQ', \"@spreadlove25 Hi, I'm late bt u need to use a debit card or if your credit card is cleared for international transa… https://t.co/cXFf4gbzcL\", 'My answer to How do I use my reward point of a credit card? https://t.co/8hVplaL86V .\\ntl;dr: Redeem for Cashback, C… https://t.co/iwIK1bSVbk', '@StanChart @StanChartIN @StanChartHelpIN \\nHi,\\nAm Using SC credit card &amp; i tried to Redeem the Cash back from SCB iO… https://t.co/V4lqJY9i5y', 'RT @DarylJohnston: I miss interacting with the fans this year, but thanks to @NFLExtraPoints I’m doing an exclusive Q&amp;A with my good friend…', 'Use your CODE Platinum or Gold Visa credit card for all your shopping this holiday season and earn DOUBLE reward po… https://t.co/1UmLTaQNtQ', 'I miss interacting with the fans this year, but thanks to @NFLExtraPoints I’m doing an exclusive Q&amp;A with my good f… https://t.co/RtEyTVUb3x', '@BPCLimited @SBICard_Connect i have SBI BPCL credit card since 2 to 3 months i am going in BPCL petrol pump(sai bab… https://t.co/w4pFd2h1oh', 'It is the time of year for spending, which is why you should apply for our Cash Back Credit Card! Get cash back on… https://t.co/JGPIeKzQmT', 'Hi @MobiKwikSWAT someone called me saying that I have mobikwik recharge coupon which has been from June , so he ask… https://t.co/3g6aZe2RC1', '@jjbaniston Hello, with the Miles you earn on flights, Miles&amp;Smiles Credit Card purchases or partner activities you… https://t.co/VrcC3SkHxx', '@VeryHelpers I took out your credit card but did not get discount on first purchase. Entered redeem welcome code an… https://t.co/PvU8qA7YTJ', 'Get rewarded this holiday season with The Police Credit Union Platinum Visa®! 💳 Earn rewards every time you use you… https://t.co/xhPpCu8EbO']\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "W4LF8a5QYFUe"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
